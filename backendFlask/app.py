@@ -14,6 +14,7 @@ def index():
     load_dotenv() 
     API_KEY = os.getenv('API_KEY')
 
+
     # Pobieramy daty z parametrów GET (lub ustawiamy domyślne)
     start_date = request.args.get('start_date', '2020-06-01')
     end_date = request.args.get('end_date', '2020-08-31')
