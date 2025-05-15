@@ -15,7 +15,7 @@ services:
     build:
       context: ./frontendReact
     ports:
-      - "3000:3000"
+      - "3000:80"
     volumes:
       - ./frontendReact:/app
     env_file:
