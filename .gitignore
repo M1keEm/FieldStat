@@ -10,3 +10,7 @@ __pycache__/
 
 # PyCharm
 .idea/
+
+/frontendReact/node_modules
+/frontendReact/dist
+/frontendReact/.env

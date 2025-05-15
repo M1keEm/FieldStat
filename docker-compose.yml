@@ -10,3 +10,13 @@ services:
       - ./backendFlask:/app
     env_file:
       - ./backendFlask/.env
+
+  frontend:
+    build:
+      context: ./frontendReact
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontendReact:/app
+    env_file:
+      - ./frontendReact/.env
