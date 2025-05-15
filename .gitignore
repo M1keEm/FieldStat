@@ -14,6 +14,9 @@ __pycache__/
 /frontendReact/node_modules
 /frontendReact/dist
 /frontendReact/.env
+<<<<<<< HEAD
+=======
 
 # macOS
 .DS_Store
+>>>>>>> ff8b13cbaaf3d4ee81026ea070d86e147341fa2b
