@@ -1,18 +1,41 @@
 from backendFlask import create_app
+import os
+from dotenv import load_dotenv
+from backendFlask.services.weatherApiFetch import get_crop_yield_by_state
+from flask import jsonify
 
 app = create_app()
+
+@app.route('/')
+def index():
+    return """
+    <h1>Welcome to the Crop Yield API</h1>
+    <p>Use the endpoint /crop_yield to get crop yield data.</p>
+    """
+
+@app.route('/crop_yield')
+def crop_yield():
+    commodity = "CORN"
+    year = 2022
+    load_dotenv()
+    api_key = os.getenv("API_KEY")
+
+    try:
+        yields = get_crop_yield_by_state(api_key, commodity, year)
+        return jsonify(yields)
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=True)
 
 
 # from flask import Flask, request
-# import requests
 # import pandas as pd
 # import matplotlib.pyplot as plt
-# from dotenv import load_dotenv
 # import io
 # import base64
-# import os
 #
 # from backendFlask import create_app
 #
