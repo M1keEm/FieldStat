@@ -49,10 +49,13 @@ def get_crop_yield_by_state(api_key, commodity, year):
         raise Exception(f"Błąd podczas pobierania danych: {response.status_code}")
 
     data = response.json().get("data", [])
+    seen_states = set()
     results = []
     counter = 0
     for item in data:
         state = item.get("state_name")
+        if state in seen_states:
+            continue # Pominięcie duplikatów
         value = item.get("Value")
         unit = item.get("unit_desc")
         try:
@@ -65,6 +68,7 @@ def get_crop_yield_by_state(api_key, commodity, year):
             "yield": yield_value,
             "unit": unit
         })
+        seen_states.add(state)
         counter += 1
 
     results.append({
