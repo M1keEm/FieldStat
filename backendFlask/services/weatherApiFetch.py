@@ -30,6 +30,7 @@ def get_crop_yield_by_state(api_key, commodity, year):
     :param api_key: Twój klucz API USDA NASS
     :param commodity: Nazwa produktu (np. 'CORN')
     :param year: Rok (np. 2022)
+    :param prodn_practice: Praktyka produkcji (aktualnie 'ALL PRODUCTION PRACTICES')
     :return: Lista słowników zawierających dane o plonach
     """
     url = "https://quickstats.nass.usda.gov/api/api_GET/"
@@ -39,6 +40,7 @@ def get_crop_yield_by_state(api_key, commodity, year):
         "year": str(year),
         "agg_level_desc": "STATE",
         "statisticcat_desc": "YIELD",
+        "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
         "format": "JSON"
     }
 
