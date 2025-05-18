@@ -1,21 +1,12 @@
-import matplotlib.pyplot as plt
 import matplotlib
+matplotlib.use('Agg')  # Use a non-GUI backend for matplotlib
 
-matplotlib.use('Agg') # Use a non-GUI backend for matplotlib (hopefully won't explode like earlier)
+import matplotlib.pyplot as plt
 
 def plot_total_production_by_state(enriched_data, save_path="total_production_by_state.png"):
-    """
-    Draws a bar chart of total production for each state.
-    Saves the plot to a file.
-    """
-    states = []
-    total_productions = []
-
-    for entry in enriched_data:
-        if entry.get("total_production") is not None:
-            states.append(entry["state"])
-            total_productions.append(entry["total_production"])
-
+    """Draw a bar chart of total production for each state and save to file."""
+    states = [entry["state"] for entry in enriched_data if entry.get("total_production") is not None]
+    total_productions = [entry["total_production"] for entry in enriched_data if entry.get("total_production") is not None]
     plt.figure(figsize=(12, 8))
     plt.bar(states, total_productions, color='skyblue')
     plt.xlabel("State")

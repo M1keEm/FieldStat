@@ -1,13 +1,6 @@
 import os
 import requests
 from dotenv import load_dotenv
-from flask import request
-
-load_dotenv()
-API_KEY = os.getenv('API_KEY')
-
-# start_date = request.args.get('start_date', '2020-06-01')
-# end_date = request.args.get('end_date', '2020-08-31')
 
 STATE_CAPITALS = {
     "Alabama": (32.3777, -86.3000),  # Montgomery
@@ -66,9 +59,7 @@ STATE_CAPITALS = {
 
 
 def get_weather_data(lat, lon, year):
-    """
-    Pobiera dane pogodowe (średnia temperatura i suma opadów) z Open-Meteo API
-    """
+    """Fetch average temperature and total precipitation from Open-Meteo API."""
     url = "https://archive-api.open-meteo.com/v1/archive"
     params = {
         "latitude": lat,
@@ -78,27 +69,19 @@ def get_weather_data(lat, lon, year):
         "daily": ["temperature_2m_mean", "precipitation_sum"],
         "timezone": "America/New_York"
     }
-
     response = requests.get(url, params=params)
-    if response.status_code != 200:
-        raise Exception(f"Błąd pogodowy: {response.status_code}")
-
+    response.raise_for_status()
     data = response.json().get("daily", {})
     temps = data.get("temperature_2m_mean", [])
     precs = data.get("precipitation_sum", [])
-
     avg_temp = sum(temps) / len(temps) if temps else None
     total_prec = sum(precs) if precs else None
-
     return avg_temp, total_prec
 
 
 def get_crop_yield_by_state(api_key, commodity, year):
-    """
-    Pobiera dane o plonach i powierzchni zasiewów z USDA QuickStats API dla danego stanu i roku.
-    """
+    """Fetch yield and area planted data from USDA QuickStats API for each state and year."""
     url = "https://quickstats.nass.usda.gov/api/api_GET/"
-    # Fetch yield data
     params_yield = {
         "key": api_key,
         "commodity_desc": commodity.upper(),
@@ -108,7 +91,6 @@ def get_crop_yield_by_state(api_key, commodity, year):
         "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
         "format": "JSON"
     }
-    # Fetch area planted data
     params_area = {
         "key": api_key,
         "commodity_desc": commodity.upper(),
@@ -118,23 +100,16 @@ def get_crop_yield_by_state(api_key, commodity, year):
         "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
         "format": "JSON"
     }
-
     yield_data = requests.get(url, params=params_yield).json().get("data", [])
     area_data = requests.get(url, params=params_area).json().get("data", [])
-
-    # Map state to area planted
-    area_by_state = {}
-    for item in area_data:
-        state = item.get("state_name")
-        value = item.get("Value")
-        try:
-            area = float(value.replace(",", ""))
-        except (ValueError, AttributeError):
-            area = None
-        area_by_state[state] = area
-
-    seen_states = set()
+    area_by_state = {
+        item.get("state_name"): (
+            float(item.get("Value", "0").replace(",", "")) if item.get("Value") else None
+        )
+        for item in area_data
+    }
     results = []
+    seen_states = set()
     for item in yield_data:
         state = item.get("state_name")
         if state in seen_states:
@@ -145,41 +120,37 @@ def get_crop_yield_by_state(api_key, commodity, year):
             yield_value = float(value.replace(",", ""))
         except (ValueError, AttributeError):
             yield_value = None
-
         area_planted = area_by_state.get(state)
         total_production = yield_value * area_planted if yield_value and area_planted else None
         if unit == "BU / ACRE":
             unit = "TONS / ACRE"
-            yield_value *= 0.0254
-
+            yield_value = yield_value * 0.0254 if yield_value else None
         results.append({
             "state": state,
-            "avg_temp_C": None,  # placeholder, will be filled in enrich_with_weather
-            "total_precip_mm": None,  # placeholder
+            "avg_temp_C": None,
+            "total_precip_mm": None,
             "area_planted_acres": area_planted,
             "unit": unit,
             "total_production": total_production,
             "average_yield": yield_value
         })
         seen_states.add(state)
-
     return results
 
 
 def enrich_with_weather(yield_data, year):
+    """Enrich yield data with weather information for each state."""
     enriched = []
     for entry in yield_data:
         state = entry["state"]
-        state_title = state.title()
-        coords = STATE_CAPITALS.get(state_title)
+        coords = STATE_CAPITALS.get(state.title())
         if not coords:
-            print(f"Brak współrzędnych dla {state}, pomijam.")
+            print(f"No coordinates for {state}, skipping.")
             continue
-        lat, lon = coords
         try:
-            avg_temp, total_prec = get_weather_data(lat, lon, year)
+            avg_temp, total_prec = get_weather_data(*coords, year)
         except Exception as e:
-            print(f"Błąd danych pogodowych dla {state}: {e}")
+            print(f"Weather data error for {state}: {e}")
             avg_temp, total_prec = None, None
         entry["avg_temp_C"] = avg_temp
         entry["total_precip_mm"] = total_prec
