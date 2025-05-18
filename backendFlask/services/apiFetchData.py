@@ -65,15 +65,6 @@ STATE_CAPITALS = {
 }
 
 
-def convert_bu_to_tons(data):
-    """
-    Konwertuje jednostki plonów z BU/ACRE na TONS/ACRE
-    """
-    for entry in data:
-        if entry["unit"] == "BU / ACRE":
-            entry["yield"] = entry["yield"] * 0.0254 if entry["yield"] is not None else None
-            entry["unit"] = "TONS / ACRE"
-    return data
 
 def get_weather_data(lat, lon, year):
     """
@@ -105,16 +96,11 @@ def get_weather_data(lat, lon, year):
 
 def get_crop_yield_by_state(api_key, commodity, year):
     """
-    Pobiera dane o plonach dla określonego produktu w danym roku dla każdego stanu USA.
-
-    :param api_key: Twój klucz API USDA NASS
-    :param commodity: Nazwa produktu (np. 'CORN')
-    :param year: Rok (np. 2022)
-    :param prodn_practice: Praktyka produkcji (aktualnie 'ALL PRODUCTION PRACTICES')
-    :return: Lista słowników zawierających dane o plonach
+    Pobiera dane o plonach i powierzchni zasiewów z USDA QuickStats API dla danego stanu i roku.
     """
     url = "https://quickstats.nass.usda.gov/api/api_GET/"
-    params = {
+    # Fetch yield data
+    params_yield = {
         "key": api_key,
         "commodity_desc": commodity.upper(),
         "year": str(year),
@@ -123,42 +109,68 @@ def get_crop_yield_by_state(api_key, commodity, year):
         "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
         "format": "JSON"
     }
+    # Fetch area planted data
+    params_area = {
+        "key": api_key,
+        "commodity_desc": commodity.upper(),
+        "year": str(year),
+        "agg_level_desc": "STATE",
+        "statisticcat_desc": "AREA PLANTED",
+        "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
+        "format": "JSON"
+    }
 
-    response = requests.get(url, params=params)
-    if response.status_code != 200:
-        raise Exception(f"Błąd podczas pobierania danych: {response.status_code}")
+    yield_data = requests.get(url, params=params_yield).json().get("data", [])
+    area_data = requests.get(url, params=params_area).json().get("data", [])
 
-    data = response.json().get("data", [])
+    # Map state to area planted
+    area_by_state = {}
+    for item in area_data:
+        state = item.get("state_name")
+        value = item.get("Value")
+        try:
+            area = float(value.replace(",", ""))
+        except (ValueError, AttributeError):
+            area = None
+        area_by_state[state] = area
+
     seen_states = set()
     results = []
     counter = 0
-    for item in data:
+    for item in yield_data:
         state = item.get("state_name")
         if state in seen_states:
-            continue  # Pominięcie duplikatów
+            continue
         value = item.get("Value")
         unit = item.get("unit_desc")
         try:
             yield_value = float(value.replace(",", ""))
         except (ValueError, AttributeError):
-            yield_value = None  # Wartość nieznana lub brak danych
+            yield_value = None
+
+        area_planted = area_by_state.get(state)
+        total_production = yield_value * area_planted if yield_value and area_planted else None
+        if unit == "BU / ACRE":
+            unit = "TONS / ACRE"
+            yield_value *= 0.0254
 
         results.append({
             "state": state,
-            "yield": yield_value,
-            "unit": unit
+            "average_yield": yield_value, # average crop yield per acre for the state, as a float
+            "unit": unit,
+            "area_planted_acres": area_planted,
+            "total_production": total_production,  # e.g., total bushels or tons
         })
         seen_states.add(state)
         counter += 1
 
     results.append({
         "state": "State number",
-        "yield": None,
+        "average_yield": None,
         "unit": counter
     })
 
     return results
-
 
 def enrich_with_weather(yield_data, year):
     """
