@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from backendFlask.services.apiFetchData import get_crop_yield_by_state
 from backendFlask.services.apiFetchData import enrich_with_weather
+from backendFlask.services.graphic import plot_total_production_by_state
 app = create_app()
 
 
@@ -32,6 +33,17 @@ def crop_yield():
         "data": enriched
     }
 
+@app.route('/plot-test')
+def plot_test():
+    sample_data = [
+        {"state": "Alabama", "total_production": 35400000},
+        {"state": "Alaska", "total_production": 1200000},
+        {"state": "Wyoming", "total_production": 5000000},
+    ]
+
+    plot_total_production_by_state(sample_data, save_path="plots/test_total_production.png")
+
+    return "Plot created and saved as test_total_production.png"
 
 if __name__ == "__main__":
     app.run(debug=True)
