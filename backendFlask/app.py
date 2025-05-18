@@ -1,10 +1,11 @@
 from backendFlask import create_app
 import os
 from dotenv import load_dotenv
-from backendFlask.services.weatherApiFetch import get_crop_yield_by_state
-from flask import jsonify
-
+from backendFlask.services.apiFetchData import get_crop_yield_by_state
+from backendFlask.services.apiFetchData import enrich_with_weather
+from backendFlask.services.graphic import plot_total_production_by_state
 app = create_app()
+
 
 @app.route('/')
 def index():
@@ -13,6 +14,7 @@ def index():
     <p>Use the endpoint /crop_yield to get crop yield data.</p>
     """
 
+
 @app.route('/crop_yield')
 def crop_yield():
     commodity = "CORN"
@@ -20,16 +22,31 @@ def crop_yield():
     load_dotenv()
     api_key = os.getenv("API_KEY")
 
-    try:
-        yields = get_crop_yield_by_state(api_key, commodity, year)
-        return jsonify(yields)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    yields = get_crop_yield_by_state(api_key, commodity, year)
+    enriched = enrich_with_weather(yields, year)
 
+    for record in enriched:
+        print(record)
+
+
+    return {
+        "data": enriched
+    }
+
+@app.route('/plot-test')
+def plot_test():
+    sample_data = [
+        {"state": "Alabama", "total_production": 35400000},
+        {"state": "Alaska", "total_production": 1200000},
+        {"state": "Wyoming", "total_production": 5000000},
+    ]
+
+    plot_total_production_by_state(sample_data, save_path="plots/test_total_production.png")
+
+    return "Plot created and saved as test_total_production.png"
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 # from flask import Flask, request
 # import pandas as pd
@@ -108,7 +125,3 @@ if __name__ == "__main__":
 #     <p><strong>Plon kukurydzy:</strong> {yield_value} bushels/acre</p>
 #     <hr>
 #     """
-#
-#
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0')
