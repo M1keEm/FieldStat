@@ -10,58 +10,70 @@ API_KEY = os.getenv('API_KEY')
 # end_date = request.args.get('end_date', '2020-08-31')
 
 STATE_CAPITALS = {
-    "California": (34.0522, -118.2437),  # Los Angeles
-    "Texas": (29.7604, -95.3698),  # Houston
-    "Florida": (25.7617, -80.1918),  # Miami
-    "New York": (40.7128, -74.0060),  # NYC
-    "Illinois": (41.8781, -87.6298),  # Chicago
-    "Pennsylvania": (40.7128, -74.0060),  # Philadelphia
-    "Ohio": (39.9612, -82.9988),  # Columbus
-    "Georgia": (33.7490, -84.3880),  # Atlanta
-    "North Carolina": (35.2271, -80.8431),  # Charlotte
-    "Michigan": (42.3314, -83.0458),  # Detroit
-    "New Jersey": (40.0583, -74.4057),  # Trenton
-    "Virginia": (37.5407, -77.4360),  # Richmond
-    "Washington": (47.6062, -122.3321),  # Seattle
-    "Arizona": (33.4484, -112.0740),  # Phoenix
-    "Massachusetts": (42.3601, -71.0589),  # Boston
-    "Tennessee": (36.1627, -86.7816),  # Nashville
-    "Indiana": (39.7684, -86.1581),  # Indianapolis
-    "Missouri": (38.6270, -90.1994),  # St. Louis
-    "Maryland": (39.2904, -76.6122),  # Baltimore
-    "Wisconsin": (43.0731, -89.4012),  # Madison
-    "Colorado": (39.7392, -104.9903),  # Denver
-    "South Carolina": (34.0003, -81.0345),  # Columbia
-    "Alabama": (32.3777, -86.3009),  # Montgomery
-    "Kentucky": (37.8399, -84.2700),  # Frankfort
-    "Oregon": (44.0682, -121.3153),  # Salem
-    "Oklahoma": (35.4676, -97.5164),  # Oklahoma City
-    "Connecticut": (41.6032, -73.0877),  # Hartford
-    "Iowa": (41.5868, -93.6250),  # Des Moines
-    "Mississippi": (32.2988, -90.1848),  # Jackson
-    "Arkansas": (34.7465, -92.2896),  # Little Rock
-    "Kansas": (39.0997, -94.5786),  # Topeka
-    "Utah": (40.7608, -111.8910),  # Salt Lake City
-    "Nevada": (39.5296, -119.8138),  # Carson City
-    "New Mexico": (35.6869, -105.9378),  # Santa Fe
-    "Nebraska": (40.8136, -96.7026),  # Lincoln
-    "West Virginia": (38.5976, -80.4549),  # Charleston
-    "Idaho": (43.6150, -116.2023),  # Boise
-    "Hawaii": (21.3069, -157.8583),  # Honolulu
-    "Maine": (44.3072, -69.7817),  # Augusta
-    "New Hampshire": (43.1939, -71.5724),  # Concord
-    "Rhode Island": (41.5801, -71.4774),  # Providence
-    "Montana": (46.5891, -112.0391),  # Helena
-    "Delaware": (39.1573, -75.5244),  # Dover
-    "South Dakota": (44.2998, -99.4388),  # Pierre
-    "North Dakota": (46.8257, -100.7837),  # Bismarck
+    "Alabama": (32.3777, -86.3000),  # Montgomery
     "Alaska": (58.3019, -134.4197),  # Juneau
+    "Arizona": (33.4484, -112.0740),  # Phoenix
+    "Arkansas": (34.7465, -92.2896),  # Little Rock
+    "California": (38.5767, -121.4944),  # Sacramento
+    "Colorado": (39.7392, -104.9903),  # Denver
+    "Connecticut": (41.7640, -72.6822),  # Hartford
+    "Delaware": (39.1573, -75.5197),  # Dover
+    "Florida": (30.4383, -84.2807),  # Tallahassee
+    "Georgia": (33.7490, -84.3880),  # Atlanta
+    "Hawaii": (21.3070, -157.8583),  # Honolulu
+    "Idaho": (43.6150, -116.2023),  # Boise
+    "Illinois": (39.7983, -89.6544),  # Springfield
+    "Indiana": (39.7684, -86.1581),  # Indianapolis
+    "Iowa": (41.5868, -93.6250),  # Des Moines
+    "Kansas": (39.0489, -95.6771),  # Topeka
+    "Kentucky": (38.2009, -84.8733),  # Frankfort
+    "Louisiana": (30.4515, -91.1871),  # Baton Rouge
+    "Maine": (44.3072, -69.7817),  # Augusta
+    "Maryland": (38.9784, -76.4922),  # Annapolis
+    "Massachusetts": (42.3601, -71.0589),  # Boston
+    "Michigan": (42.7336, -84.5553),  # Lansing
+    "Minnesota": (44.9537, -93.0900),  # Saint Paul
+    "Mississippi": (32.2988, -90.1848),  # Jackson
+    "Missouri": (38.5791, -92.1729),  # Jefferson City
+    "Montana": (46.5891, -112.0391),  # Helena
+    "Nebraska": (40.8136, -96.7026),  # Lincoln
+    "Nevada": (39.1638, -119.7674),  # Carson City
+    "New Hampshire": (43.2067, -71.5376),  # Concord
+    "New Jersey": (40.2206, -74.7699),  # Trenton
+    "New Mexico": (35.6870, -105.9378),  # Santa Fe
+    "New York": (42.6526, -73.7562),  # Albany
+    "North Carolina": (35.7796, -78.6382),  # Raleigh
+    "North Dakota": (46.8083, -100.7837),  # Bismarck
+    "Ohio": (39.9612, -82.9988),  # Columbus
+    "Oklahoma": (35.4676, -97.5164),  # Oklahoma City
+    "Oregon": (44.9429, -123.0351),  # Salem
+    "Pennsylvania": (40.2732, -76.8867),  # Harrisburg
+    "Rhode Island": (41.8236, -71.4222),  # Providence
+    "South Carolina": (34.0007, -81.0348),  # Columbia
+    "South Dakota": (44.3670, -100.3464),  # Pierre
+    "Tennessee": (36.1627, -86.7816),  # Nashville
+    "Texas": (30.2747, -97.7404),  # Austin
+    "Utah": (40.7608, -111.8910),  # Salt Lake City
     "Vermont": (44.2601, -72.5754),  # Montpelier
+    "Virginia": (37.5407, -77.4360),  # Richmond
+    "Washington": (47.0379, -122.9007),  # Olympia
+    "West Virginia": (38.3498, -81.6326),  # Charleston
+    "Wisconsin": (43.0747, -89.3842),  # Madison
     "Wyoming": (41.1400, -104.8202),  # Cheyenne
     "District of Columbia": (38.9072, -77.0369),  # Washington D.C.
-    "Puerto Rico": (18.2208, -66.5901)  # San Juan
+    "Puerto Rico": (18.4655, -66.1057)  # San Juan
 }
 
+
+def convert_bu_to_tons(data):
+    """
+    Konwertuje jednostki plonów z BU/ACRE na TONS/ACRE
+    """
+    for entry in data:
+        if entry["unit"] == "BU / ACRE":
+            entry["yield"] = entry["yield"] * 0.0254 if entry["yield"] is not None else None
+            entry["unit"] = "TONS / ACRE"
+    return data
 
 def get_weather_data(lat, lon, year):
     """

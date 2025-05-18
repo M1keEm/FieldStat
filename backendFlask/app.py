@@ -3,6 +3,7 @@ import os
 from dotenv import load_dotenv
 from backendFlask.services.apiFetchData import get_crop_yield_by_state
 from backendFlask.services.apiFetchData import enrich_with_weather
+from backendFlask.services.apiFetchData import convert_bu_to_tons
 app = create_app()
 
 
@@ -27,6 +28,7 @@ def crop_yield():
     for record in enriched:
         print(record)
 
+    enriched = convert_bu_to_tons(enriched)
     return {
         "data": enriched
     }
@@ -112,7 +114,3 @@ if __name__ == "__main__":
 #     <p><strong>Plon kukurydzy:</strong> {yield_value} bushels/acre</p>
 #     <hr>
 #     """
-#
-#
-# if __name__ == '__main__':
-#     app.run(debug=True, host='0.0.0.0')
