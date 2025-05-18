@@ -65,7 +65,6 @@ STATE_CAPITALS = {
 }
 
 
-
 def get_weather_data(lat, lon, year):
     """
     Pobiera dane pogodowe (średnia temperatura i suma opadów) z Open-Meteo API
@@ -136,7 +135,6 @@ def get_crop_yield_by_state(api_key, commodity, year):
 
     seen_states = set()
     results = []
-    counter = 0
     for item in yield_data:
         state = item.get("state_name")
         if state in seen_states:
@@ -156,48 +154,34 @@ def get_crop_yield_by_state(api_key, commodity, year):
 
         results.append({
             "state": state,
-            "average_yield": yield_value, # average crop yield per acre for the state, as a float
-            "unit": unit,
+            "avg_temp_C": None,  # placeholder, will be filled in enrich_with_weather
+            "total_precip_mm": None,  # placeholder
             "area_planted_acres": area_planted,
-            "total_production": total_production,  # e.g., total bushels or tons
+            "unit": unit,
+            "total_production": total_production,
+            "average_yield": yield_value
         })
         seen_states.add(state)
-        counter += 1
-
-    results.append({
-        "state": "State number",
-        "average_yield": None,
-        "unit": counter
-    })
 
     return results
 
-def enrich_with_weather(yield_data, year):
-    """
-    Dodaje dane pogodowe do wyników USDA.
-    """
-    enriched = []
 
+def enrich_with_weather(yield_data, year):
+    enriched = []
     for entry in yield_data:
         state = entry["state"]
         state_title = state.title()
         coords = STATE_CAPITALS.get(state_title)
-
         if not coords:
             print(f"Brak współrzędnych dla {state}, pomijam.")
             continue
-
         lat, lon = coords
         try:
             avg_temp, total_prec = get_weather_data(lat, lon, year)
         except Exception as e:
             print(f"Błąd danych pogodowych dla {state}: {e}")
             avg_temp, total_prec = None, None
-
-        entry.update({
-            "avg_temp_C": avg_temp,
-            "total_precip_mm": total_prec
-        })
+        entry["avg_temp_C"] = avg_temp
+        entry["total_precip_mm"] = total_prec
         enriched.append(entry)
-
     return enriched
