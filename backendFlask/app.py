@@ -1,10 +1,10 @@
 from backendFlask import create_app
 import os
 from dotenv import load_dotenv
-from backendFlask.services.weatherApiFetch import get_crop_yield_by_state
-from flask import jsonify
-
+from backendFlask.services.apiFetchData import get_crop_yield_by_state
+from backendFlask.services.apiFetchData import enrich_with_weather
 app = create_app()
+
 
 @app.route('/')
 def index():
@@ -13,6 +13,7 @@ def index():
     <p>Use the endpoint /crop_yield to get crop yield data.</p>
     """
 
+
 @app.route('/crop_yield')
 def crop_yield():
     commodity = "CORN"
@@ -20,16 +21,19 @@ def crop_yield():
     load_dotenv()
     api_key = os.getenv("API_KEY")
 
-    try:
-        yields = get_crop_yield_by_state(api_key, commodity, year)
-        return jsonify(yields)
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+    yields = get_crop_yield_by_state(api_key, commodity, year)
+    enriched = enrich_with_weather(yields, year)
+
+    for record in enriched:
+        print(record)
+
+    return {
+        "data": enriched
+    }
 
 
 if __name__ == "__main__":
     app.run(debug=True)
-
 
 # from flask import Flask, request
 # import pandas as pd
