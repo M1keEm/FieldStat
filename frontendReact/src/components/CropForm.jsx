@@ -40,8 +40,7 @@ const [plotData, setPlotData] = useState(null);
       params: {
         commodity: formData.crop,
         year: formData.year
-      },
-      timeout: 30000 // 30 sekund timeout
+      }
     });
     
     setPlotData(plotResponse.data.data);

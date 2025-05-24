@@ -22,11 +22,11 @@ def crop_yield():
 
 @plot_bp.route('/plot')
 def plot():
-    crop = current_app.config.get('LAST_CROP', 'CORN')
+    crop = current_app.config.get('LAST_CROP')
     year = current_app.config.get('LAST_YEAR', 2022)
 
-    commodity = request.args.get("commodity", "CORN").upper()
-    year = int(request.args.get("year", 2022))
+    commodity = request.args.get("commodity", crop).upper()
+    year = int(request.args.get("year", year))
     yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
     enriched = enrich_with_weather(yields, year)
     plot_dir = "plots"
