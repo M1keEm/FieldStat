@@ -14,11 +14,11 @@ def create_app(test_config=None):
     from .config import Config
 
     app = Flask(__name__)
-    jwt = JWTManager(app)
     if test_config:
         app.config.update(test_config)
     else:
         app.config.from_object('backendFlask.config.Config')
+    jwt = JWTManager(app)
 
     db.init_app(app)
     migrate.init_app(app, db)
