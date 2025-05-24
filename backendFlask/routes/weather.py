@@ -11,9 +11,9 @@ def weather():
     year = int(request.args.get("year", 2022))
     coords = STATE_CAPITALS.get(state)
     if not coords:
-        return jsonify(error=f"Coordinates for {state} not found."), 404
+        return jsonify(message=f"Coordinates for {state} not found."), 404
     try:
         avg_temp, total_prec = get_weather_data(*coords, year)
         return jsonify(state=state, year=year, avg_temp_C=avg_temp, total_precip_mm=total_prec)
     except Exception as e:
-        return jsonify(error=str(e)), 500
+        return jsonify(message=str(e)), 500
