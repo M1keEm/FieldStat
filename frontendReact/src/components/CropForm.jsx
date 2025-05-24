@@ -4,20 +4,26 @@ import axios from 'axios';
 const CropForm = () => {
   const [formData, setFormData] = useState({
     year: new Date().getFullYear(),
-    crop: 'pszenica'
+    crop: 'Chicken'
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState('');
 
   const crops = [
-    { value: 'corn', label: 'Corn' },
-    { value: 'kukurydza', label: 'Kukurydza' },
-    { value: 'rzepak', label: 'Rzepak' },
-    { value: 'buraki', label: 'Buraki cukrowe' }
+    { value: 'CHICKEN', label: 'Chicken' },
+    { value: 'CORN', label: 'Corn' },
+    { value: 'EGGS', label: 'Eggs' },
+    { value: 'OATS', label: 'Oats' },
+    { value: 'PEANUTS', label: 'Peanuts' },
+    { value: 'RICE', label: 'Rice' },
+    { value: 'TURKEYS', label: 'Turkey' }
   ];
 
   const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+
+const [plotData, setPlotData] = useState(null);
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,13 +31,37 @@ const CropForm = () => {
     setMessage('');
 
     try {
-      const response = await axios.post('http://localhost:5000/api/crops', formData);
-      setMessage(`Dane zapisane: ${response.data.message}`);
-    } catch (error) {
-      setMessage(`Błąd: ${error.response?.data?.error || error.message}`);
-    } finally {
-      setIsSubmitting(false);
+    // 1. Zapisz dane
+    const saveResponse = await axios.post('http://localhost:5000/api/crops', formData);
+    setMessage(`Saved data: ${saveResponse.data.message}`);
+    
+    // 2. Pobierz dane do wykresu
+    const plotResponse = await axios.get('http://localhost:5000/crop_yield', {
+      params: {
+        commodity: formData.crop,
+        year: formData.year
+      },
+      timeout: 30000 // 30 sekund timeout
+    });
+    
+    setPlotData(plotResponse.data.data);
+    
+  } catch (error) {
+    setMessage(`Error: ${error.response?.data?.error || error.message}`);
+    if (error.code === 'ECONNABORTED') {
+      setMessage('Request timeout - try again later');
     }
+  } finally {
+    setIsSubmitting(false);
+  }
+    // try {
+    //   const response = await axios.post('http://localhost:5000/api/crops', formData);
+    //   setMessage(`Saved data: ${response.data.message}`);
+    // } catch (error) {
+    //   setMessage(`Erorr: ${error.response?.data?.error || error.message}`);
+    // } finally {
+    //   setIsSubmitting(false);
+    // }
   };
 
   const handleChange = (e) => {

@@ -3,6 +3,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from flask_migrate import Migrate
+from flask_cors import CORS
+
 
 db = SQLAlchemy()
 migrate = Migrate()
@@ -12,6 +14,8 @@ def create_app():
     from .config import Config
 
     app = Flask(__name__)
+
+    CORS(app)
     app.config.from_object(Config)
 
     db.init_app(app)
@@ -20,7 +24,13 @@ def create_app():
     from .routes.main import main_bp
     from .routes.weather import weather_bp
     from .routes.plot import plot_bp
+    from .routes.data import data_bp
 
+    CORS(main_bp)
+    CORS(weather_bp)
+    CORS(plot_bp)
+    CORS(data_bp)
+    app.register_blueprint(data_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(weather_bp)
     app.register_blueprint(plot_bp)
