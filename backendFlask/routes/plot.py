@@ -1,11 +1,8 @@
 import os
 from flask import Blueprint, request, jsonify
-from dotenv import load_dotenv
+from backendFlask.config import Config
 from backendFlask.services.apiFetchData import get_crop_yield_by_state, enrich_with_weather
 from backendFlask.services.graphic import plot_total_production_by_state
-
-load_dotenv()
-API_KEY = os.getenv("API_KEY")
 
 plot_bp = Blueprint('plot', __name__)
 
@@ -13,7 +10,7 @@ plot_bp = Blueprint('plot', __name__)
 def crop_yield():
     commodity = request.args.get("commodity", "CORN").upper()
     year = int(request.args.get("year", 2022))
-    yields = get_crop_yield_by_state(API_KEY, commodity, year)
+    yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
     enriched = enrich_with_weather(yields, year)
     return jsonify(data=enriched)
 
@@ -21,7 +18,7 @@ def crop_yield():
 def plot():
     commodity = request.args.get("commodity", "CORN").upper()
     year = int(request.args.get("year", 2022))
-    yields = get_crop_yield_by_state(API_KEY, commodity, year)
+    yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
     enriched = enrich_with_weather(yields, year)
     plot_dir = "plots"
     os.makedirs(plot_dir, exist_ok=True)
