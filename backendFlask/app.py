@@ -2,6 +2,7 @@ from backendFlask import create_app
 import os
 from dotenv import load_dotenv
 from flask import request, jsonify
+from flask_cors import CORS
 from backendFlask.services.apiFetchData import get_crop_yield_by_state, STATE_CAPITALS, get_weather_data, enrich_with_weather
 from backendFlask.services.graphic import plot_total_production_by_state
 
@@ -10,6 +11,7 @@ load_dotenv()
 API_KEY = os.getenv("API_KEY")
 
 app = create_app()
+CORS(app)
 
 @app.route('/')
 def index():
@@ -54,6 +56,24 @@ def plot():
 @app.errorhandler(Exception)
 def handle_exception(e):
     return jsonify(error=str(e)), 500
+
+@app.route('/api/crops', methods=['POST'])
+def handle_crop_data():
+    try:
+        data = request.get_json()
+        
+        print(f"Requested Data: Year - {data['year']}, Crop - {data['crop']}")
+        
+        return jsonify({
+            "message": f"Data saved for {data['crop']} ({data['year']})",
+            "status": "success"
+        }), 200
+        
+    except Exception as e:
+        return jsonify({
+            "error": str(e),
+            "status": "error"
+        }), 400
 
 if __name__ == "__main__":
     app.run(debug=True)
