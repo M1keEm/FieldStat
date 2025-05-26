@@ -1,6 +1,8 @@
 import os
 import requests
 from dotenv import load_dotenv
+from backendFlask.config import Config
+
 
 STATE_CAPITALS = {
     "Alabama": (32.3777, -86.3000),  # Montgomery
@@ -82,60 +84,73 @@ def get_weather_data(lat, lon, year):
 def get_crop_yield_by_state(api_key, commodity, year):
     """Fetch yield and area planted data from USDA QuickStats API for each state and year."""
     url = "https://quickstats.nass.usda.gov/api/api_GET/"
-    params_yield = {
-        "key": api_key,
-        "commodity_desc": commodity.upper(),
-        "year": str(year),
-        "agg_level_desc": "STATE",
-        "statisticcat_desc": "YIELD",
-        "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
-        "format": "JSON"
-    }
-    params_area = {
-        "key": api_key,
-        "commodity_desc": commodity.upper(),
-        "year": str(year),
-        "agg_level_desc": "STATE",
-        "statisticcat_desc": "AREA PLANTED",
-        "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
-        "format": "JSON"
-    }
-    yield_data = requests.get(url, params=params_yield).json().get("data", [])
-    area_data = requests.get(url, params=params_area).json().get("data", [])
-    area_by_state = {
-        item.get("state_name"): (
-            float(item.get("Value", "0").replace(",", "")) if item.get("Value") else None
-        )
-        for item in area_data
-    }
-    results = []
-    seen_states = set()
-    for item in yield_data:
-        state = item.get("state_name")
-        if state in seen_states:
-            continue
-        value = item.get("Value")
-        unit = item.get("unit_desc")
-        try:
-            yield_value = float(value.replace(",", ""))
-        except (ValueError, AttributeError):
-            yield_value = None
-        area_planted = area_by_state.get(state)
-        total_production = yield_value * area_planted if yield_value and area_planted else None
-        if unit == "BU / ACRE":
-            unit = "TONS / ACRE"
-            yield_value = yield_value * 0.0254 if yield_value else None
-        results.append({
-            "state": state,
-            "avg_temp_C": None,
-            "total_precip_mm": None,
-            "area_planted_acres": area_planted,
-            "unit": unit,
-            "total_production": total_production,
-            "average_yield": yield_value
+    try:
+        # Dodaj timeout do żądań USDA
+        response = requests.get(url, params={
+            'key': Config.API_KEY,
+            'commodity_desc': commodity,
+            'year': str(year),
+            'statisticcat_desc': 'YIELD',
         })
-        seen_states.add(state)
-    return results
+
+        params_yield = {
+            "key": api_key,
+            "commodity_desc": commodity.upper(),
+            "year": str(year),
+            "agg_level_desc": "STATE",
+            "statisticcat_desc": "YIELD",
+            "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
+            "format": "JSON"
+        }
+        params_area = {
+            "key": api_key,
+            "commodity_desc": commodity.upper(),
+            "year": str(year),
+            "agg_level_desc": "STATE",
+            "statisticcat_desc": "AREA PLANTED",
+            "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
+            "format": "JSON"
+        }
+        yield_data = requests.get(url, params=params_yield).json().get("data", [])
+        area_data = requests.get(url, params=params_area).json().get("data", [])
+        area_by_state = {
+            item.get("state_name"): (
+                float(item.get("Value", "0").replace(",", "")) if item.get("Value") else None
+            )
+            for item in area_data
+        }
+        results = []
+        seen_states = set()
+        for item in yield_data:
+            state = item.get("state_name")
+            if state in seen_states:
+                continue
+            value = item.get("Value")
+            unit = item.get("unit_desc")
+            try:
+                yield_value = float(value.replace(",", ""))
+            except (ValueError, AttributeError):
+                yield_value = None
+            area_planted = area_by_state.get(state)
+            total_production = yield_value * area_planted if yield_value and area_planted else None
+            if unit == "BU / ACRE":
+                unit = "TONS / ACRE"
+                yield_value = yield_value * 0.0254 if yield_value else None
+            results.append({
+                "commodity": commodity,
+                "state": state,
+                "avg_temp_C": None,
+                "total_precip_mm": None,
+                "area_planted_acres": area_planted,
+                "unit": unit,
+                "total_production": total_production,
+                "average_yield": yield_value
+            })
+            seen_states.add(state)
+        return results
+    except requests.exceptions.Timeout:
+        print("USDA API timeout")
+        return []
 
 
 def enrich_with_weather(yield_data, year):
