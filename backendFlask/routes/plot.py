@@ -8,6 +8,11 @@ from backendFlask.services.graphic import plot_total_production_by_state
 
 plot_bp = Blueprint('plot', __name__)
 
+def fetch_and_enrich_crop_yield(commodity, year):
+    yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
+    enriched = enrich_with_weather(yields, year)
+    return enriched
+
 @plot_bp.route('/crop_yield')
 def crop_yield():
     crop = current_app.config.get('LAST_CROP')
