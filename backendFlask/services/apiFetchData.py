@@ -113,12 +113,24 @@ def get_crop_yield_by_state(api_key, commodity, year):
         }
         yield_data = requests.get(url, params=params_yield).json().get("data", [])
         area_data = requests.get(url, params=params_area).json().get("data", [])
-        area_by_state = {
-            item.get("state_name"): (
-                float(item.get("Value", "0").replace(",", "")) if item.get("Value") else None
-            )
-            for item in area_data
-        }
+
+        # Safely parse area values, handling special values like (D) for disclosure limitations
+        area_by_state = {}
+        for item in area_data:
+            state = item.get("state_name")
+            value = item.get("Value")
+            try:
+                if value and not any(special in value for special in ["(D)", "(NA)", "NA", "--"]):
+                    # Remove commas and convert to float
+                    area_by_state[state] = float(value.replace(",", "").strip())
+                else:
+                    # Use None for special values indicating no data
+                    area_by_state[state] = None
+            except ValueError:
+                # If conversion fails for any reason, use None
+                print(f"Warning: Could not convert area value '{value}' for {state}")
+                area_by_state[state] = None
+
         results = []
         seen_states = set()
         for item in yield_data:
@@ -127,15 +139,28 @@ def get_crop_yield_by_state(api_key, commodity, year):
                 continue
             value = item.get("Value")
             unit = item.get("unit_desc")
+
+            # Safely parse yield values, handling special values
             try:
-                yield_value = float(value.replace(",", ""))
-            except (ValueError, AttributeError):
+                if value and not any(special in value for special in ["(D)", "(NA)", "NA", "--"]):
+                    yield_value = float(value.replace(",", "").strip())
+                else:
+                    yield_value = None
+            except ValueError:
+                print(f"Warning: Could not convert yield value '{value}' for {state}")
                 yield_value = None
+
             area_planted = area_by_state.get(state)
-            total_production = yield_value * area_planted if yield_value and area_planted else None
+            total_production = yield_value * area_planted if yield_value is not None and area_planted is not None else None
+
             if unit == "BU / ACRE":
                 unit = "TONS / ACRE"
-                yield_value = yield_value * 0.0254 if yield_value else None
+                yield_value = yield_value * 0.0254 if yield_value is not None else None
+
+            if unit == "CWT / ACRE":
+                unit = "TONS / ACRE"
+                yield_value = yield_value * 0.04546 if yield_value is not None else None
+
             results.append({
                 "commodity": commodity,
                 "state": state,
