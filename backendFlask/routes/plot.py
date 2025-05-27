@@ -15,27 +15,41 @@ def fetch_and_enrich_crop_yield(commodity, year):
 
 @plot_bp.route('/crop_yield')
 def crop_yield():
-    crop = current_app.config.get('LAST_CROP')
+    commodity = current_app.config.get('LAST_CROP')
     year = current_app.config.get('LAST_YEAR', 2022)
-    print(f"Fetching crop yield for {crop} in {year}")
-    
-    commodity = request.args.get("commodity", crop).upper()
+    print(f"Fetching crop yield for {commodity} in {year}")
+
+    # Get commodity from request args, fall back to stored commodity
+    request_commodity = request.args.get("commodity")
+    if request_commodity is None:
+        if commodity is None:
+            return jsonify(error="No commodity specified and no default available"), 400
+        request_commodity = commodity
+
+    request_commodity = request_commodity.upper()
     year = int(request.args.get("year", year))
-    yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
+    yields = get_crop_yield_by_state(Config.API_KEY, request_commodity, year)
     enriched = enrich_with_weather(yields, year)
     return jsonify(data=enriched)
 
 @plot_bp.route('/plot')
 def plot():
-    crop = current_app.config.get('LAST_CROP')
+    commodity = current_app.config.get('LAST_CROP')
     year = current_app.config.get('LAST_YEAR', 2022)
 
-    commodity = request.args.get("commodity", crop).upper()
+    request_commodity = request.args.get("commodity")
+    if request_commodity is None:
+        if commodity is None:
+            return jsonify(error="No commodity specified and no default available"), 400
+        request_commodity = commodity
+
+    request_commodity = request_commodity.upper()
     year = int(request.args.get("year", year))
-    yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
+    yields = get_crop_yield_by_state(Config.API_KEY, request_commodity, year)
     enriched = enrich_with_weather(yields, year)
     plot_dir = "plots"
     os.makedirs(plot_dir, exist_ok=True)
     plot_path = os.path.join(plot_dir, "total_production.png")
     plot_total_production_by_state(enriched, save_path=plot_path)
     return jsonify(message="Plot created", path=f"/{plot_path}")
+

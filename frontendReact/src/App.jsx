@@ -1,28 +1,50 @@
-import { useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import CropForm from './components/CropForm';
+import Register from './components/register.component.jsx';
+import Login from './components/login.component.jsx';
+import Dashboard from './components/Dashboard';
+import './App.css';
 
+// Protected Route component
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
 
 function App() {
-  const [data, setData] = useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // const fetchData = async () => {
-  //   try {
-  //     const response = await axios.get('http://localhost:5000/api/data');
-  //     setData(response.data);
-  //   } catch (error) {
-  //     console.error('Error fetching data:', error);
-  //   }
-  // };
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
 
   return (
-    <div className="App">
-      <h1>Form</h1>
-      {/* <button onClick={fetchData}>Get Data from Flask</button>
-      {data && <pre>{JSON.stringify(data, null, 2)}</pre>} */}
-      <CropForm />
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          <Route path="/" element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/crop-form" element={
+            <ProtectedRoute>
+              <CropForm />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
 export default App;
+
