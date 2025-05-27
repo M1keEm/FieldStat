@@ -19,7 +19,11 @@ def crop_yield():
     year = current_app.config.get('LAST_YEAR', 2022)
     print(f"Fetching crop yield for {crop} in {year}")
     
-    commodity = request.args.get("commodity", crop).upper()
+    # Fix: handle None for crop and provide a default
+    commodity = request.args.get("commodity", crop if crop else "CORN")
+    if commodity is None:
+        return jsonify(error="No commodity specified and no default available"), 400
+    commodity = commodity.upper()
     year = int(request.args.get("year", year))
     yields = get_crop_yield_by_state(Config.API_KEY, commodity, year)
     enriched = enrich_with_weather(yields, year)
@@ -39,3 +43,4 @@ def plot():
     plot_path = os.path.join(plot_dir, "total_production.png")
     plot_total_production_by_state(enriched, save_path=plot_path)
     return jsonify(message="Plot created", path=f"/{plot_path}")
+

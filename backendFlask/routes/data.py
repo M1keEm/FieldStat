@@ -33,3 +33,4 @@ def handle_crop_data():
             "crop": crop,
             "year": year
         }), 200
+    return None

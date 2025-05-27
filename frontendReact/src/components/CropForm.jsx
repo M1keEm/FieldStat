@@ -34,7 +34,7 @@ const [plotData, setPlotData] = useState(null);
     // 1. Zapisz dane
     const saveResponse = await axios.post('http://localhost:5000/api/crops', formData);
     setMessage(`Saved data: ${saveResponse.data.message}`);
-    
+
     // 2. Pobierz dane do wykresu
     const plotResponse = await axios.get('http://localhost:5000/crop_yield', {
       params: {
@@ -42,9 +42,9 @@ const [plotData, setPlotData] = useState(null);
         year: formData.year
       }
     });
-    
+
     setPlotData(plotResponse.data.data);
-    
+
   } catch (error) {
     setMessage(`Error: ${error.response?.data?.error || error.message}`);
     if (error.code === 'ECONNABORTED') {
