@@ -1,42 +1,196 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.crop-form {
+  max-width: 420px;
+  margin: 2.5rem auto;
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafbfc;
+  box-shadow: 0 4px 24px 0 rgba(60,72,88,0.08);
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+/* Auth Form Styles */
+.auth-form {
+  max-width: 380px;
+  margin: 2.5rem auto;
+  padding: 2rem 2.5rem 1.5rem 2.5rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 12px;
+  background: #fafbfc;
+  box-shadow: 0 4px 24px 0 rgba(60,72,88,0.08);
+  font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
+}
+
+.auth-form h2 {
   text-align: center;
+  color: #2e7d32;
+  margin-bottom: 1.5rem;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.auth-form .form-control {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #bdbdbd;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+  background: #fff;
+  transition: border 0.2s;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+.auth-form .form-control:focus {
+  border: 1.5px solid #4CAF50;
+  outline: none;
+}
+
+.auth-form button {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.auth-link {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.auth-link a {
+  color: #4CAF50;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.auth-link a:hover {
+  text-decoration: underline;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+select {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #bdbdbd;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #fff;
+  transition: border 0.2s;
+}
+
+select:focus {
+  border: 1.5px solid #4CAF50;
+  outline: none;
+}
+
+button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 0.7rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+button:hover:not(:disabled) {
+  background-color: #388e3c;
+}
+
+button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.message {
+  margin-top: 1.2rem;
+  padding: 0.7rem 1rem;
+  border-radius: 6px;
+  font-size: 1rem;
+  background: #e3f7e6;
+  color: #256029;
+  border: 1px solid #b2dfdb;
+}
+
+.message.error {
+  background: #fdecea;
+  color: #b71c1c;
+  border: 1px solid #f5c6cb;
+}
+
+.App {
+  min-height: 100vh;
+  background: linear-gradient(120deg, #f0f4f8 0%, #e8f5e9 100%);
+  padding-top: 2rem;
+}
+
+h1, h2 {
+  text-align: center;
+  color: #2e7d32;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+}
+
+/* Chart Styles */
+.charts-container {
+  margin-top: 2.5rem;
+  padding: 1rem;
+  background: linear-gradient(to bottom, #fafbfc, #f0f4f8);
+  border-radius: 12px;
+  box-shadow: 0 4px 24px 0 rgba(60,72,88,0.08);
+}
+
+.charts-title {
+  text-align: center;
+  color: #2e7d32;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.chart-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.chart-wrapper {
+  height: 300px;
+  position: relative;
+}
+
+.no-data-message {
+  text-align: center;
+  padding: 2rem;
+  color: #757575;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .charts-grid {
+    grid-template-columns: 1fr;
   }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
 }

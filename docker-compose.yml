@@ -10,6 +10,9 @@ services:
       - db
     env_file:
       - ./backendFlask/.env
+    networks:
+      - fieldstat-network
+    container_name: fieldstat-backend
 
   frontend:
     build:
@@ -20,7 +23,11 @@ services:
       - ./frontendReact:/app
     env_file:
       - ./frontendReact/.env
-
+    networks:
+      - fieldstat-network
+    depends_on:
+      - backend
+    container_name: fieldstat-frontend
 
   db:
     image: postgres:15
@@ -32,6 +39,14 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    networks:
+      - fieldstat-network
+    container_name: fieldstat-db
+
+networks:
+  fieldstat-network:
+    driver: bridge
 
 volumes:
   postgres_data:
+
