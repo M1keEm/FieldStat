@@ -85,14 +85,33 @@ def get_crop_yield_by_state(api_key, commodity, year):
     """Fetch yield and area planted data from USDA QuickStats API for each state and year."""
     url = "https://quickstats.nass.usda.gov/api/api_GET/"
     try:
-        # Dodaj timeout do żądań USDA
-        response = requests.get(url, params={
-            'key': Config.API_KEY,
+        # Initial check request to verify API connectivity
+        check_params = {
+            'key': api_key,
             'commodity_desc': commodity,
             'year': str(year),
             'statisticcat_desc': 'YIELD',
-        })
+            'format': 'JSON',
+            'limit': 1
+        }
 
+        try:
+            check_response = requests.get(url, params=check_params, timeout=10)
+            if check_response.status_code != 200:
+                print(f"USDA API returned status code {check_response.status_code}")
+                return []
+
+            # Test if response is valid JSON
+            check_response.json()
+        except requests.exceptions.JSONDecodeError as e:
+            print(f"USDA API returned invalid JSON: {e}")
+            print(f"Response content: {check_response.text[:200]}...")
+            return []
+        except requests.exceptions.RequestException as e:
+            print(f"Request error: {e}")
+            return []
+
+        # If initial check passed, proceed with full data requests
         params_yield = {
             "key": api_key,
             "commodity_desc": commodity.upper(),
@@ -111,9 +130,43 @@ def get_crop_yield_by_state(api_key, commodity, year):
             "prodn_practice_desc": "ALL PRODUCTION PRACTICES",
             "format": "JSON"
         }
-        yield_data = requests.get(url, params=params_yield).json().get("data", [])
-        area_data = requests.get(url, params=params_area).json().get("data", [])
 
+        # Fetch yield data with proper error handling
+        try:
+            yield_response = requests.get(url, params=params_yield, timeout=15)
+            if yield_response.status_code != 200:
+                print(f"USDA API yield request failed with status {yield_response.status_code}")
+                yield_data = []
+            else:
+                yield_data = yield_response.json().get("data", [])
+        except requests.exceptions.JSONDecodeError:
+            print(f"Invalid JSON in yield response")
+            yield_data = []
+        except requests.exceptions.RequestException as e:
+            print(f"Yield request error: {e}")
+            yield_data = []
+
+        # Fetch area data with proper error handling
+        try:
+            area_response = requests.get(url, params=params_area, timeout=15)
+            if area_response.status_code != 200:
+                print(f"USDA API area request failed with status {area_response.status_code}")
+                area_data = []
+            else:
+                area_data = area_response.json().get("data", [])
+        except requests.exceptions.JSONDecodeError:
+            print(f"Invalid JSON in area response")
+            area_data = []
+        except requests.exceptions.RequestException as e:
+            print(f"Area request error: {e}")
+            area_data = []
+
+        # If no yield data available, return empty results
+        if not yield_data:
+            print(f"No yield data found for {commodity} in {year}")
+            return []
+
+        # Continue with the parsing of data as before
         # Safely parse area values, handling special values like (D) for disclosure limitations
         area_by_state = {}
         for item in area_data:
