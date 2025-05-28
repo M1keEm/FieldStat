@@ -4,18 +4,18 @@ import { Bar, Doughnut, Line, PolarArea, Scatter, Bubble } from 'react-chartjs-2
 
 // Register ChartJS components
 ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  PointElement,
-  LineElement,
-  ArcElement,
-  RadialLinearScale,
-  BubbleController,
-  ScatterController,
-  Title,
-  Tooltip,
-  Legend
+    CategoryScale,
+    LinearScale,
+    BarElement,
+    PointElement,
+    LineElement,
+    ArcElement,
+    RadialLinearScale,
+    BubbleController,
+    ScatterController,
+    Title,
+    Tooltip,
+    Legend
 );
 
 const CropCharts = ({ plotData, commodity, year }) => {
@@ -46,7 +46,7 @@ const CropCharts = ({ plotData, commodity, year }) => {
 
     // Sort states by yield for better visualization
     const sortedByYield = [...plotData].sort((a, b) =>
-      (b.average_yield || 0) - (a.average_yield || 0));
+        (b.average_yield || 0) - (a.average_yield || 0));
 
     // Take top 10 states for better readability
     const topStates = sortedByYield.slice(0, 10);
@@ -63,18 +63,18 @@ const CropCharts = ({ plotData, commodity, year }) => {
     const correlationData = topStates.map(item => ({
       x: item.avg_temp_C,
       y: item.average_yield,
-      r: Math.max(MIN_BUBBLE_RADIUS, Math.min(MAX_BUBBLE_RADIUS, (item.area_planted_acres || 0) / AREA_DIVISOR)),  // Size based on area, min 5, max 20
+      r: Math.max(5, Math.min(20, (item.area_planted_acres || 0) / 50000)),  // Size based on area, min 5, max 20
       state: item.state
     }));
 
     // Generate background colors
     const backgroundColors = states.map((_, index) => colorPalette[index % colorPalette.length]);
     const precipColorsByAmount = precipitations.map(precip =>
-      precip > 1000 ? 'rgba(0, 0, 255, 0.7)' :  // Very wet (blue)
-      precip > 750 ? 'rgba(30, 144, 255, 0.7)' : // Wet (lighter blue)
-      precip > 500 ? 'rgba(95, 158, 160, 0.7)' : // Moderate (teal)
-      precip > 250 ? 'rgba(240, 230, 140, 0.7)' : // Dry (yellow)
-      'rgba(255, 140, 0, 0.7)'  // Very dry (orange)
+        precip > 1000 ? 'rgba(0, 0, 255, 0.7)' :  // Very wet (blue)
+            precip > 750 ? 'rgba(30, 144, 255, 0.7)' : // Wet (lighter blue)
+                precip > 500 ? 'rgba(95, 158, 160, 0.7)' : // Moderate (teal)
+                    precip > 250 ? 'rgba(240, 230, 140, 0.7)' : // Dry (yellow)
+                        'rgba(255, 140, 0, 0.7)'  // Very dry (orange)
     );
 
     // Create chart data objects
@@ -114,10 +114,10 @@ const CropCharts = ({ plotData, commodity, year }) => {
           label: 'Average Temperature (°C)',
           data: temperatures,
           backgroundColor: temperatures.map(temp =>
-            temp > 20 ? 'rgba(255, 99, 132, 0.7)' :
-            temp > 15 ? 'rgba(255, 159, 64, 0.7)' :
-            temp > 10 ? 'rgba(255, 205, 86, 0.7)' :
-            'rgba(75, 192, 192, 0.7)'
+              temp > 20 ? 'rgba(255, 99, 132, 0.7)' :
+                  temp > 15 ? 'rgba(255, 159, 64, 0.7)' :
+                      temp > 10 ? 'rgba(255, 205, 86, 0.7)' :
+                          'rgba(75, 192, 192, 0.7)'
           ),
           borderWidth: 1,
         }]
@@ -213,7 +213,7 @@ const CropCharts = ({ plotData, commodity, year }) => {
         ticks: {
           callback: function(value) {
             return value >= 1000000 ? (value/1000000).toFixed(1) + 'M' :
-                   value >= 1000 ? (value/1000).toFixed(1) + 'K' : value;
+                value >= 1000 ? (value/1000).toFixed(1) + 'K' : value;
           }
         }
       }
@@ -389,56 +389,56 @@ const CropCharts = ({ plotData, commodity, year }) => {
     }
 
     return (
-      <div className="no-data-message">
-        <h3>No Data Available</h3>
-        <p>{message}</p>
-        <p>Try selecting a different commodity or an earlier year.</p>
-      </div>
+        <div className="no-data-message">
+          <h3>No Data Available</h3>
+          <p>{message}</p>
+          <p>Try selecting a different commodity or an earlier year.</p>
+        </div>
     );
   }
 
   return (
-    <div className="charts-container">
-      <h2 className="charts-title">Data Visualization for {commodity} ({year})</h2>
+      <div className="charts-container">
+        <h2 className="charts-title">Data Visualization for {commodity} ({year})</h2>
 
-      <div className="charts-grid">
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.yieldData && <Bar data={chartData.yieldData} options={barOptions} />}
+        <div className="charts-grid">
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.yieldData && <Bar data={chartData.yieldData} options={barOptions} />}
+            </div>
           </div>
-        </div>
 
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.areaData && <Line data={chartData.areaData} options={lineOptions} />}
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.areaData && <Line data={chartData.areaData} options={lineOptions} />}
+            </div>
           </div>
-        </div>
 
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.productionData && <Doughnut data={chartData.productionData} options={doughnutOptions} />}
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.productionData && <Doughnut data={chartData.productionData} options={doughnutOptions} />}
+            </div>
           </div>
-        </div>
 
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.temperatureData && <PolarArea data={chartData.temperatureData} options={polarAreaOptions} />}
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.temperatureData && <PolarArea data={chartData.temperatureData} options={polarAreaOptions} />}
+            </div>
           </div>
-        </div>
 
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.precipitationData && <Bar data={chartData.precipitationData} options={precipitationOptions} />}
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.precipitationData && <Bar data={chartData.precipitationData} options={precipitationOptions} />}
+            </div>
           </div>
-        </div>
 
-        <div className="chart-card">
-          <div className="chart-wrapper">
-            {chartData.yieldWeatherCorrelationData && <Bubble data={chartData.yieldWeatherCorrelationData} options={bubbleOptions} />}
+          <div className="chart-card">
+            <div className="chart-wrapper">
+              {chartData.yieldWeatherCorrelationData && <Bubble data={chartData.yieldWeatherCorrelationData} options={bubbleOptions} />}
+            </div>
           </div>
         </div>
       </div>
-    </div>
   );
 };
 
