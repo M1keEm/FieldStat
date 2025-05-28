@@ -3,7 +3,6 @@ from flask import current_app
 from flask import Blueprint, request, jsonify, current_app
 from backendFlask.config import Config
 from backendFlask.services.apiFetchData import get_crop_yield_by_state, enrich_with_weather
-from backendFlask.services.graphic import plot_total_production_by_state
 
 
 plot_bp = Blueprint('plot', __name__)
