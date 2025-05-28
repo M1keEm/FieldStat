@@ -204,7 +204,6 @@ def get_crop_yield_by_state(api_key, commodity, year):
                 yield_value = None
 
             area_planted = area_by_state.get(state)
-            total_production = yield_value * area_planted if yield_value is not None and area_planted is not None else None
 
             if unit == "BU / ACRE":
                 unit = "TONS / ACRE"
@@ -213,6 +212,8 @@ def get_crop_yield_by_state(api_key, commodity, year):
             if unit == "CWT / ACRE":
                 unit = "TONS / ACRE"
                 yield_value = yield_value * 0.04546 if yield_value is not None else None
+
+            total_production = yield_value * area_planted if yield_value is not None and area_planted is not None else None
 
             results.append({
                 "commodity": commodity,
