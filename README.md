@@ -36,6 +36,7 @@ Both components are containerized using Docker and orchestrated with Docker Comp
    ```bash
    git clone <repository-url>
    cd FieldStat
+   #enter your own api_key to .env file in the backendFlask directory
    ```
 2. Start the application using Docker Compose:
    ```bash
