@@ -63,7 +63,7 @@ const CropCharts = ({ plotData, commodity, year }) => {
     const correlationData = topStates.map(item => ({
       x: item.avg_temp_C,
       y: item.average_yield,
-      r: Math.max(5, Math.min(20, (item.area_planted_acres || 0) / 50000)),  // Size based on area, min 5, max 20
+      r: Math.max(MIN_BUBBLE_RADIUS, Math.min(MAX_BUBBLE_RADIUS, (item.area_planted_acres || 0) / AREA_DIVISOR)),  // Size based on area, min 5, max 20
       state: item.state
     }));
 
