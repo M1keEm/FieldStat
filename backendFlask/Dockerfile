@@ -13,4 +13,10 @@ ENV FLASK_RUN_HOST=0.0.0.0
 
 EXPOSE 5000
 
+CMD ["flask", "db", "init"]
+
+CMD ["flask", "db", "migrate", "-m", "migrate all"]
+
+CMD ["flask", "db", "upgrade"]
+
 CMD ["flask", "run"]

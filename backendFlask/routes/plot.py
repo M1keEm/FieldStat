@@ -32,24 +32,3 @@ def crop_yield():
     enriched = enrich_with_weather(yields, year)
     return jsonify(data=enriched)
 
-@plot_bp.route('/plot')
-def plot():
-    commodity = current_app.config.get('LAST_CROP')
-    year = current_app.config.get('LAST_YEAR', 2022)
-
-    request_commodity = request.args.get("commodity")
-    if request_commodity is None:
-        if commodity is None:
-            return jsonify(error="No commodity specified and no default available"), 400
-        request_commodity = commodity
-
-    request_commodity = request_commodity.upper()
-    year = int(request.args.get("year", year))
-    yields = get_crop_yield_by_state(Config.API_KEY, request_commodity, year)
-    enriched = enrich_with_weather(yields, year)
-    plot_dir = "plots"
-    os.makedirs(plot_dir, exist_ok=True)
-    plot_path = os.path.join(plot_dir, "total_production.png")
-    plot_total_production_by_state(enriched, save_path=plot_path)
-    return jsonify(message="Plot created", path=f"/{plot_path}")
-
