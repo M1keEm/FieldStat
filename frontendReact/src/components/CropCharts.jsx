@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, RadialLinearScale } from 'chart.js';
-import { Bar, Doughnut, Line, PolarArea } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, PointElement, LineElement, ArcElement, Title, Tooltip, Legend, RadialLinearScale, BubbleController, ScatterController } from 'chart.js';
+import { Bar, Doughnut, Line, PolarArea, Scatter, Bubble } from 'react-chartjs-2';
 
 // Register ChartJS components
 ChartJS.register(
@@ -11,6 +11,8 @@ ChartJS.register(
   LineElement,
   ArcElement,
   RadialLinearScale,
+  BubbleController,
+  ScatterController,
   Title,
   Tooltip,
   Legend
@@ -21,7 +23,9 @@ const CropCharts = ({ plotData, commodity, year }) => {
     yieldData: null,
     areaData: null,
     productionData: null,
-    temperatureData: null
+    temperatureData: null,
+    precipitationData: null,
+    yieldWeatherCorrelationData: null
   });
 
   // Custom color palette
@@ -53,9 +57,25 @@ const CropCharts = ({ plotData, commodity, year }) => {
     const areas = topStates.map(item => item.area_planted_acres);
     const productions = topStates.map(item => item.total_production);
     const temperatures = topStates.map(item => item.avg_temp_C);
+    const precipitations = topStates.map(item => item.total_precip_mm);
+
+    // Prepare correlation data
+    const correlationData = topStates.map(item => ({
+      x: item.avg_temp_C,
+      y: item.average_yield,
+      r: Math.max(5, Math.min(20, (item.area_planted_acres || 0) / 50000)),  // Size based on area, min 5, max 20
+      state: item.state
+    }));
 
     // Generate background colors
     const backgroundColors = states.map((_, index) => colorPalette[index % colorPalette.length]);
+    const precipColorsByAmount = precipitations.map(precip =>
+      precip > 1000 ? 'rgba(0, 0, 255, 0.7)' :  // Very wet (blue)
+      precip > 750 ? 'rgba(30, 144, 255, 0.7)' : // Wet (lighter blue)
+      precip > 500 ? 'rgba(95, 158, 160, 0.7)' : // Moderate (teal)
+      precip > 250 ? 'rgba(240, 230, 140, 0.7)' : // Dry (yellow)
+      'rgba(255, 140, 0, 0.7)'  // Very dry (orange)
+    );
 
     // Create chart data objects
     setChartData({
@@ -101,6 +121,24 @@ const CropCharts = ({ plotData, commodity, year }) => {
           ),
           borderWidth: 1,
         }]
+      },
+      precipitationData: {
+        labels: states,
+        datasets: [{
+          label: 'Total Precipitation (mm)',
+          data: precipitations,
+          backgroundColor: precipColorsByAmount,
+          borderColor: precipColorsByAmount.map(color => color.replace('0.7', '1')),
+          borderWidth: 1,
+        }]
+      },
+      yieldWeatherCorrelationData: {
+        datasets: [{
+          label: 'Yield vs Temperature',
+          data: correlationData,
+          backgroundColor: backgroundColors,
+          hoverBackgroundColor: backgroundColors.map(color => color.replace('0.7', '0.9')),
+        }]
       }
     });
   }, [plotData]);
@@ -112,6 +150,7 @@ const CropCharts = ({ plotData, commodity, year }) => {
     plugins: {
       legend: {
         position: 'top',
+        display: false,
       },
       title: {
         display: true,
@@ -132,6 +171,10 @@ const CropCharts = ({ plotData, commodity, year }) => {
     scales: {
       y: {
         beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Yield (tons/acre)'
+        },
         grid: {
           color: 'rgba(0, 0, 0, 0.05)'
         }
@@ -231,6 +274,109 @@ const CropCharts = ({ plotData, commodity, year }) => {
     }
   };
 
+  const precipitationOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        display: false,
+      },
+      title: {
+        display: true,
+        text: `${commodity} Total Precipitation by State (${year})`,
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            return `Precipitation: ${context.parsed.y?.toFixed(0) || 'N/A'} mm`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        title: {
+          display: true,
+          text: 'Precipitation (mm)'
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        grid: {
+          display: false
+        }
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart'
+    }
+  };
+
+  const bubbleOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        position: 'top',
+        display: false,
+      },
+      title: {
+        display: true,
+        text: `${commodity} Yield vs Temperature (${year})`,
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function(context) {
+            const dataPoint = context.raw;
+            return [
+              `State: ${dataPoint.state}`,
+              `Temperature: ${dataPoint.x?.toFixed(1) || 'N/A'}°C`,
+              `Yield: ${dataPoint.y?.toFixed(2) || 'N/A'}`
+            ];
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        title: {
+          display: true,
+          text: 'Yield'
+        },
+        grid: {
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      },
+      x: {
+        title: {
+          display: true,
+          text: 'Average Temperature (°C)'
+        },
+        grid: {
+          display: true,
+          color: 'rgba(0, 0, 0, 0.05)'
+        }
+      }
+    },
+    animation: {
+      duration: 2000,
+      easing: 'easeOutQuart'
+    }
+  };
+
   // If no data, display a message
   if (!plotData || plotData.length === 0) {
     const currentYear = new Date().getFullYear();
@@ -277,6 +423,18 @@ const CropCharts = ({ plotData, commodity, year }) => {
         <div className="chart-card">
           <div className="chart-wrapper">
             {chartData.temperatureData && <PolarArea data={chartData.temperatureData} options={polarAreaOptions} />}
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-wrapper">
+            {chartData.precipitationData && <Bar data={chartData.precipitationData} options={precipitationOptions} />}
+          </div>
+        </div>
+
+        <div className="chart-card">
+          <div className="chart-wrapper">
+            {chartData.yieldWeatherCorrelationData && <Bubble data={chartData.yieldWeatherCorrelationData} options={bubbleOptions} />}
           </div>
         </div>
       </div>
