@@ -4,19 +4,20 @@ WORKDIR /backendFlask
 
 COPY optimized-requirements.txt requirements.txt
 
-RUN pip install --no-cache-dir -r requirements.txt
+# Install netcat for the database connection check
+RUN apt-get update && apt-get install -y netcat-openbsd && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY . .
+
+# Make entrypoint script executable
+RUN chmod +x /backendFlask/entrypoint.sh
 
 ENV FLASK_APP=app.py
 ENV FLASK_RUN_HOST=0.0.0.0
 
 EXPOSE 5000
 
-CMD ["flask", "db", "init"]
+# Use entrypoint script instead of direct flask command
+ENTRYPOINT ["/backendFlask/entrypoint.sh"]
 
-CMD ["flask", "db", "migrate", "-m", "migrate all"]
-
-CMD ["flask", "db", "upgrade"]
-
-CMD ["flask", "run"]
