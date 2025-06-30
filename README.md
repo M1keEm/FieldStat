@@ -34,7 +34,7 @@ Both components are containerized using Docker and orchestrated with Docker Comp
 ### Quick Start
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone [(https://github.com/M1keEm/FieldStat)]
    cd FieldStat
    #enter your own api_key to .env file in the backendFlask directory
    ```
