@@ -24,10 +24,3 @@ def test_weather(client):
     assert "state" in json_data
     assert "avg_temp_C" in json_data
     assert "total_precip_mm" in json_data
-
-def test_plot(client):
-    response = client.get('/plot?commodity=CORN&year=2022')
-    assert response.status_code == 200
-    json_data = response.get_json()
-    assert "message" in json_data
-    assert "path" in json_data

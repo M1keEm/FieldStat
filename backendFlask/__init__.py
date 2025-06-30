@@ -34,10 +34,6 @@ def create_app(test_config=None):
     from .routes.auth import auth_bp
     from .routes.protected import protected_bp
 
-    CORS(main_bp)
-    CORS(weather_bp)
-    CORS(plot_bp)
-    CORS(data_bp)
     app.register_blueprint(data_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(weather_bp)
